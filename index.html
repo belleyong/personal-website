@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="day">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>belle 詩帷 — cs grad, hikes, boulders, bakes</title>
+<meta name="description" content="personal site of belle 詩帷 — computer science graduate. projects, photos, hobbies and a place to leave me a note.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   1. COLOURS AND THEME
+   Change a value here and it updates everywhere on the site.
+   ============================================================ */
+:root{
+  --paper:#f2ece3;   /* page background */
+  --card:#fffdf9;    /* window background */
+  --ink:#2f2b28;     /* main text + window borders */
+  --soft:#7d746a;    /* quieter text */
+  --line:#d8cfc6;    /* thin borders */
+  --accent:#432033;  /* plum accent */
+  --tint:#f5ecf1;    /* pale plum fill */
+  --deep:#432033;    /* text on tinted fills */
+  --bar:#fffdf9;     /* bottom bar */
+  --shadow:rgba(0,0,0,.14);
+  --accent-a:rgba(67,32,51,.24);
+}
+[data-theme="night"]{
+  --paper:#1b1418; --card:#241a20; --ink:#f0e1e9; --soft:#b09aa6;
+  --line:#4a3641; --accent:#e0bccf; --tint:#33232c; --deep:#f3e2eb;
+  --bar:#241a20; --shadow:rgba(0,0,0,.5); --accent-a:rgba(224,188,207,.3);
+}
+
+/* ============================================================
+   2. RESETS AND SHARED TYPE
+   ============================================================ */
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:'Zen Maru Gothic',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:var(--accent)}
+a:hover{color:var(--deep)}
+button{font-family:inherit;cursor:pointer;color:inherit}
+input,textarea{font-family:inherit}
+.mono{font-family:'Space Mono',monospace}
+
+/* small reusable pieces */
+.label{font:700 11px 'Space Mono',monospace;letter-spacing:.16em;color:var(--accent)}
+.note{font:400 12px/1.6 'Space Mono',monospace;color:var(--soft)}
+.lead{font:400 17px/1.6 'Zen Maru Gothic',sans-serif;color:var(--soft)}
+.btn{
+  border:2px solid var(--accent); background:var(--tint); color:var(--deep);
+  padding:8px 16px; font:500 17px 'Zen Maru Gothic',sans-serif;
+  box-shadow:0 3px 0 var(--accent-a);
+}
+.btn:hover{box-shadow:0 5px 0 var(--accent-a)}
+.field{border-left:3px solid var(--accent);padding-left:12px}
+.field-val{font:400 17px/1.5 'Zen Maru Gothic',sans-serif;color:var(--ink);margin-top:4px}
+.ph{ /* placeholder box — swap these for real images */
+  border:2px solid var(--line); background:rgba(127,127,127,.06);
+  display:flex; align-items:center; justify-content:center;
+  font:400 11px 'Space Mono',monospace; color:var(--soft); text-align:center;
+}
+
+/* ============================================================
+   3. LANDING SCREEN (the seed you tap)
+   ============================================================ */
+.landing{
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:hidden; text-align:center; padding:24px;
+}
+.landing-ground{
+  position:absolute; left:0; right:0; bottom:0; height:120px;
+  border-top:2px dashed var(--line);
+  background:linear-gradient(180deg,var(--accent-a),transparent);
+  opacity:.5;
+}
+.landing-inner{position:relative;z-index:2}
+.landing h1{font:900 clamp(2.6rem,7vw,4.4rem)/1 'Zen Maru Gothic',sans-serif;margin:14px 0 10px}
+.landing p{font:400 clamp(1rem,2vw,1.25rem)/1.5 'Zen Maru Gothic',sans-serif;color:var(--soft);margin:0 auto 30px;max-width:30ch}
+.seed{
+  width:132px; height:132px; border-radius:50%; border:2px solid var(--accent);
+  background:var(--tint); color:var(--deep);
+  font:700 17px 'Zen Maru Gothic',sans-serif;
+  box-shadow:0 6px 0 var(--accent-a); animation:bob 2.6s infinite;
+}
+.seed:hover{box-shadow:0 9px 2px var(--accent-a);animation:sprout .5s}
+
+/* ============================================================
+   4. THE OUTER WINDOW FRAME
+   ============================================================ */
+.frame-wrap{
+  min-height:100vh; padding:clamp(14px,2.4vw,34px);
+  display:flex; align-items:center; justify-content:center;
+}
+.frame{
+  flex:1; display:flex; flex-direction:column; margin:0 auto;
+  background:var(--card); border:2px solid var(--ink);
+  box-shadow:0 6px 0 var(--shadow);
+  position:relative; overflow:hidden;
+  min-height:600px; max-width:940px; max-height:min(780px,calc(100vh - 68px));
+}
+.titlebar{
+  flex:none; display:flex; align-items:center; justify-content:space-between;
+  gap:10px; flex-wrap:wrap; padding:9px 14px;
+  background:var(--ink); color:var(--paper);
+  font:400 15px 'Space Mono',monospace;
+}
+.dots{display:flex;align-items:center;gap:9px}
+.dot{width:9px;height:9px;border-radius:50%;background:currentColor;opacity:.55}
+.tb-btns{display:flex;align-items:center;gap:7px}
+.tb-btn{
+  border:1px solid rgba(255,255,255,.4); background:transparent;
+  border-radius:4px; padding:2px 9px; font:400 12px 'Space Mono',monospace;
+}
+.tb-btn:hover{background:rgba(255,255,255,.12)}
+
+/* the desk area windows sit on */
+.desk{
+  flex:1; position:relative; min-height:0;
+  display:flex; align-items:center; justify-content:center;
+  padding:clamp(18px,3vh,40px); overflow:hidden;
+}
+.waves{position:absolute;left:0;right:0;bottom:0;height:130px;overflow:hidden;pointer-events:none}
+.wave-1{position:absolute;left:0;bottom:0;width:200%;height:110px;animation:swell 14s ease-in-out infinite alternate}
+.wave-2{position:absolute;left:-50%;bottom:0;width:200%;height:84px;animation:swell 9s ease-in-out infinite alternate-reverse}
+
+/* night extras */
+.night-layer{position:absolute;inset:0;pointer-events:none}
+.moon{
+  position:absolute; right:46px; top:26px; width:52px; height:52px;
+  border-radius:50%; background:rgba(240,225,235,.12);
+  border:1px solid rgba(240,225,235,.38);
+}
+.firefly{
+  position:absolute; border-radius:50%; background:#f2d59a;
+  box-shadow:0 0 12px #f2d59a;
+}
+
+/* ============================================================
+   5. HOME WINDOW (hero + icon row)
+   ============================================================ */
+.home-win{
+  width:100%; max-width:clamp(40rem,54vw,44rem);
+  background:var(--card); border:2px solid var(--ink);
+  box-shadow:0 5px 0 var(--shadow); position:relative; z-index:1;
+}
+.win-head{
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:6px 11px; background:var(--ink); color:var(--paper);
+  font:400 13px 'Space Mono',monospace;
+}
+.win-head .dots{gap:8px}
+.win-head .dot{width:8px;height:8px}
+.home-body{padding:26px 28px 24px;text-align:center}
+.home-body h1{font:900 clamp(2.1rem,4.4vw,3.3rem)/1 'Zen Maru Gothic',sans-serif;margin:0}
+.home-body .sub{font:400 clamp(1rem,1.6vw,1.2rem)/1.5 'Zen Maru Gothic',sans-serif;color:var(--soft);margin:9px 0 4px}
+.bloom-line{font:400 12px 'Space Mono',monospace;letter-spacing:.12em;color:var(--accent);margin-bottom:22px}
+.icon-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:18px 12px;justify-items:center}
+.icon-btn{
+  border:none; background:transparent; padding:0;
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  transition:transform .18s cubic-bezier(0,0,.2,1);
+}
+.icon-btn:hover{transform:translateY(-3px)}
+.tile{
+  width:48px; height:48px; border-radius:11px;
+  border:2px solid var(--ink); background:var(--tint);
+  display:flex; align-items:center; justify-content:center;
+  font:700 15px 'Space Mono',monospace; color:var(--deep);
+  box-shadow:0 5px 0 var(--shadow);
+}
+.icon-btn.bloomed .tile{border-color:var(--accent)}
+.icon-label{font:500 16px 'Zen Maru Gothic',sans-serif;color:var(--ink)}
+
+/* ============================================================
+   6. MOTIVATIONAL POP-UP
+   ============================================================ */
+.popup{
+  position:absolute; left:50%; top:14px; transform:translateX(-50%);
+  width:min(320px,86%); z-index:99;
+  border:2px solid var(--accent); background:var(--tint);
+  box-shadow:0 4px 0 var(--accent-a); padding:11px 15px; text-align:center;
+  animation:popin .3s ease-out;
+}
+.popup-text{font:700 clamp(1.15rem,2vw,1.45rem)/1.15 'Zen Maru Gothic',sans-serif;color:var(--deep)}
+.popup-track{margin-top:9px;height:4px;background:var(--accent-a);border-radius:2px;overflow:hidden}
+.popup-bar{height:4px;background:var(--accent);width:100%;transform-origin:left}
+
+/* ============================================================
+   7. SECTION WINDOWS (draggable)
+   ============================================================ */
+.win{
+  position:absolute; background:var(--card); border:2px solid var(--ink);
+  box-shadow:0 6px 0 var(--shadow); animation:winin .25s ease-out;
+}
+.win-head.grab{cursor:grab}
+.win-close{border:none;background:transparent;font:400 15px 'Space Mono',monospace;padding:0 2px}
+.win-body{padding:20px 22px;overflow:auto;max-height:min(58vh,460px)}
+.row{display:flex;gap:22px;flex-wrap:wrap}
+
+/* about */
+.avatar{width:140px;height:140px;border-radius:50%}
+.about-text{flex:1;min-width:240px}
+.about-text h2{font:700 clamp(1.5rem,2.6vw,2rem)/1.15 'Zen Maru Gothic',sans-serif;margin:0 0 8px}
+.stack{display:flex;flex-direction:column;gap:14px}
+
+/* projects */
+.proj-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.proj-card{
+  border:2px solid var(--line); background:var(--card);
+  box-shadow:0 4px 0 var(--shadow); padding:12px; min-height:136px;
+  transition:all .18s cubic-bezier(0,0,.2,1); text-align:left;
+}
+.proj-card.linked{cursor:pointer}
+.proj-card:hover{border-color:var(--accent);background:var(--tint);box-shadow:0 6px 0 var(--accent-a)}
+.thumb{height:74px}
+.thumb.real{background:#3f7f92 center 62% / cover no-repeat;border:0}
+.proj-name{font:500 18px 'Zen Maru Gothic',sans-serif;color:var(--ink);margin-top:8px}
+.proj-face{display:block}
+.proj-back{display:none}
+.proj-card:hover .proj-face{display:none}
+.proj-card:hover .proj-back{display:block}
+.proj-back .proj-title{font:700 18px/1.2 'Zen Maru Gothic',sans-serif;color:var(--deep)}
+.proj-back .proj-meta{font:400 11px/1.6 'Space Mono',monospace;color:var(--accent);margin-top:4px}
+.proj-back .proj-desc{font:400 14px/1.4 'Zen Maru Gothic',sans-serif;color:var(--ink);margin-top:6px}
+.proj-back .proj-cta{font:500 13px 'Space Mono',monospace;color:var(--accent);margin-top:6px}
+
+/* gallery */
+.sheet{
+  border:2px solid var(--ink); background:rgba(127,127,127,.06); padding:10px;
+  display:grid; grid-template-columns:repeat(4,1fr); gap:10px;
+}
+.frame-btn{height:96px;padding:0}
+.frame-btn:hover{border-color:var(--accent)}
+.lightbox-img{height:320px}
+.lightbox-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap}
+.btn-quiet{border:2px solid var(--line);background:var(--card);padding:5px 12px;font:500 16px 'Zen Maru Gothic',sans-serif;color:var(--ink)}
+
+/* hobbies */
+.hobby-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.hobby-card{
+  border:2px solid var(--line); background:var(--card);
+  box-shadow:0 4px 0 var(--shadow); padding:10px; text-align:left;
+  display:flex; flex-direction:column; gap:7px;
+  transition:all .18s cubic-bezier(0,0,.2,1);
+}
+.hobby-card.on{border-color:var(--accent);background:var(--tint);box-shadow:0 5px 0 var(--accent-a)}
+.hobby-icon{height:48px;background:var(--accent-a);display:flex;align-items:center;justify-content:center;font:400 11px 'Space Mono',monospace;color:var(--soft)}
+.hobby-name{font:500 17px 'Zen Maru Gothic',sans-serif;color:var(--ink)}
+
+/* life log */
+.log{display:flex;flex-direction:column;gap:16px}
+.log-entry{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.log-entry+.log-entry{border-top:2px dashed var(--line);padding-top:16px}
+.log-photo{width:170px;height:116px;flex:none}
+.log-text{flex:1;min-width:200px}
+.log-date{font:400 12px 'Space Mono',monospace;color:var(--accent)}
+.log-caption{font:400 19px/1.45 'Zen Maru Gothic',sans-serif;color:var(--ink);margin-top:3px}
+
+/* faq */
+.faq-list{display:flex;flex-direction:column;gap:10px}
+.faq-item{border:2px solid var(--line);background:var(--card);padding:10px 13px}
+.faq-item.on{border-color:var(--accent);background:var(--tint)}
+.faq-q{display:flex;width:100%;justify-content:space-between;align-items:center;gap:10px;border:none;background:transparent;padding:0;text-align:left}
+.faq-q span:first-child{font:500 19px 'Zen Maru Gothic',sans-serif;color:var(--ink)}
+.chev{font:400 13px 'Space Mono',monospace;color:var(--accent);transition:transform .2s}
+.faq-item.on .chev{transform:rotate(180deg)}
+.faq-a{font:400 17px/1.55 'Zen Maru Gothic',sans-serif;color:var(--deep);margin-top:7px}
+
+/* note / guestbook */
+.plant-col{flex:none;width:230px}
+.plant{position:relative;height:220px;border:2px solid var(--accent);background:var(--tint)}
+.stem{position:absolute;left:50%;bottom:14px;width:3px;height:120px;background:var(--accent);transform:translateX(-50%);opacity:.55}
+.bloom{position:absolute;width:14px;height:14px;border-radius:60% 40% 60% 40%;background:var(--accent);opacity:.8}
+.plant-empty{position:absolute;left:0;right:0;bottom:16px;text-align:center;font:400 13px 'Space Mono',monospace;color:var(--soft)}
+.bloom-count{font:400 12px 'Space Mono',monospace;color:var(--accent);text-align:center;margin-top:8px;letter-spacing:.1em}
+.note-col{flex:1;min-width:260px}
+.note-col h2{font:700 clamp(1.25rem,2.2vw,1.65rem)/1.3 'Zen Maru Gothic',sans-serif;margin:0 0 12px}
+.ta{
+  width:100%; min-height:92px; border:2px solid var(--line);
+  background:var(--card); color:var(--ink); padding:9px 11px;
+  font:400 17px/1.45 'Zen Maru Gothic',sans-serif; resize:vertical;
+}
+.note-row{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;align-items:center}
+.in{
+  flex:1; min-width:170px; border:2px solid var(--line);
+  background:var(--card); color:var(--ink); padding:8px 11px;
+  font:400 16px 'Zen Maru Gothic',sans-serif;
+}
+
+/* contact + cv */
+.centered{text-align:center}
+.centered h2{font:700 clamp(1.6rem,3vw,2.2rem)/1.1 'Zen Maru Gothic',sans-serif;margin:0 0 8px}
+.mail-btn{display:inline-block;font:500 19px 'Zen Maru Gothic',sans-serif;text-decoration:none}
+.socials{display:flex;gap:16px;justify-content:center;margin-top:20px;flex-wrap:wrap;font:400 15px 'Space Mono',monospace}
+
+/* ============================================================
+   8. BOTTOM BAR (orchid + mood)
+   ============================================================ */
+.bottombar{
+  flex:none; display:flex; align-items:center; justify-content:space-between;
+  gap:12px; flex-wrap:wrap; padding:8px 14px;
+  border-top:2px solid var(--ink); background:var(--bar);
+}
+.orchid-btn{display:flex;align-items:center;gap:10px;border:none;background:transparent;padding:0;text-align:left}
+.orchid{
+  width:30px; height:38px; border:2px solid var(--accent); border-radius:5px;
+  background:var(--tint); display:flex; align-items:center; justify-content:center;
+  font:700 9px 'Space Mono',monospace; color:var(--deep); animation:bob 2.4s infinite;
+}
+.orchid-line{font:400 15px 'Zen Maru Gothic',sans-serif;color:var(--soft)}
+.mood{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.mood-faces{display:flex;align-items:center;gap:8px}
+.mood-btn{
+  width:34px; height:34px; border-radius:50%;
+  border:2px solid var(--line); background:transparent; color:var(--soft);
+  font:700 12px 'Space Mono',monospace;
+  display:flex; align-items:center; justify-content:center;
+  transition:all .18s cubic-bezier(0,0,.2,1);
+}
+.mood-btn.on{border-color:var(--accent);background:var(--accent);color:var(--card)}
+
+/* ============================================================
+   9. ANIMATIONS
+   ============================================================ */
+@keyframes bob{0%,100%{transform:translateY(4px)}50%{transform:translateY(-2px)}}
+@keyframes sprout{0%{transform:scale(1)}45%{transform:scale(1.16) rotate(-3deg)}100%{transform:scale(1)}}
+@keyframes petal{0%{opacity:.9;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx,8px),26px) scale(.4)}}
+@keyframes fly{0%{transform:translate(0,0)}25%{transform:translate(26px,-18px)}50%{transform:translate(48px,10px)}75%{transform:translate(18px,22px)}100%{transform:translate(0,0)}}
+@keyframes glow{0%,100%{opacity:.25}50%{opacity:1}}
+@keyframes popin{0%{opacity:0;transform:translate(-50%,-10px) scale(.94)}100%{opacity:1;transform:translate(-50%,0) scale(1)}}
+@keyframes bloomin{0%{opacity:0;transform:scale(.2)}70%{transform:scale(1.15)}100%{opacity:1;transform:scale(1)}}
+@keyframes winin{0%{opacity:0;transform:scale(.97) translateY(6px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes shrinkbar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@keyframes swell{from{transform:translateX(0)}to{transform:translateX(-18%)}}
+
+/* ============================================================
+   10. PHONE LAYOUT — the frame disappears, everything stacks
+   ============================================================ */
+@media (max-width:767px){
+  .frame-wrap{padding:0}
+  .frame{max-width:none;max-height:none;border:0;box-shadow:none}
+  .desk{padding:14px}
+  .home-win{max-width:100%}
+  .icon-grid{grid-template-columns:repeat(2,1fr)}
+  .proj-grid{grid-template-columns:1fr}
+  .sheet{grid-template-columns:1fr 1fr}
+  .hobby-grid{grid-template-columns:1fr 1fr}
+  .plant-col{width:100%}
+  .win{inset:0 !important;width:auto !important;display:flex;flex-direction:column;box-shadow:none}
+  .win-body{max-height:none;flex:1}
+  .win-head.grab{cursor:default}
+  /* hover-to-flip does not exist on touch, so show the details */
+  .proj-face{display:none}
+  .proj-back{display:block}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important;transition:none !important}
+}
+</style>
+</head>
+
+<body>
+<div id="app"></div>
+
+<script>
+/* ============================================================
+   YOUR CONTENT — edit the text between the quote marks.
+   Everything below section 2 is the machinery; you rarely
+   need to touch it.
+   ============================================================ */
+
+/* the messages that pop up. add as many as you like. */
+const MSGS = [
+  "how are you?",
+  "you are loved ;>",
+  "you are doing better than you think!",
+  "be kind to yourself ;)",
+  "you are beautiful ;]",
+  "believe in yourself!",
+  "i hope you are having a lovely day!",
+  "keep smiling :)",
+  "remember! you bring so much happiness :0"
+];
+
+/* how long a pop-up stays on screen, in seconds */
+const POPUP_SECONDS = 3;
+
+/* your email — used by the contact and cv buttons */
+const EMAIL = "belleyom@gmail.com";
+
+/* your links. put your real profile urls here. */
+const LINKS = {
+  instagram: "https://instagram.com",
+  github: "https://github.com",
+  linkedin: "https://linkedin.com"
+};
+
+/* the icons on the home screen. `code` is the two letters on the tile,
+   `w` is how wide the window opens on desktop. */
+const SECTIONS = [
+  {id:"about",    code:"ab", en:"about",         zh:"關於我",   w:620},
+  {id:"projects", code:"pr", en:"projects",      zh:"專案",     w:720},
+  {id:"gallery",  code:"ga", en:"gallery",       zh:"照片",     w:700},
+  {id:"hobbies",  code:"ho", en:"hobbies",       zh:"興趣",     w:680},
+  {id:"lifelog",  code:"lg", en:"life log",      zh:"生活紀錄", w:620},
+  {id:"faq",      code:"fa", en:"faq",           zh:"問答",     w:600},
+  {id:"note",     code:"no", en:"leave a note",  zh:"留言",     w:720},
+  {id:"contact",  code:"ct", en:"contact",       zh:"聯絡",     w:520},
+  {id:"cv",       code:"cv", en:"cv",            zh:"履歷",     w:520}
+];
+
+const PROJECTS = [
+  {
+    name:"Nesian Narratives Toolkit (Capstone)",
+    meta:"2026 · REACT | TAILWIND CSS | MERN | AGILE",
+    learned:"An interactive learning platform making cultural education more accessible and engaging.",
+    detail:"Full-stack MERN build with authentication, user engagement features and REST APIs. Nominated for the Community Impact Award in recognition of the project's social impact.",
+    stack:"React | Tailwind CSS | MERN | Agile",
+    link:"https://nesian-narratives.onrender.com",
+    thumb:"assets/nesian-cover.png"
+  },
+  {name:"[ project two ]",   meta:"[ year ] · [ tech stack ]", learned:"[ one or two lines about it ]", stack:"[ stack ]", link:""},
+  {name:"[ project three ]", meta:"[ year ] · [ tech stack ]", learned:"[ one or two lines about it ]", stack:"[ stack ]", link:""},
+  {name:"[ project four ]",  meta:"[ year ] · [ tech stack ]", learned:"[ one or two lines about it ]", stack:"[ stack ]", link:""},
+  {name:"[ project five ]",  meta:"[ year ] · [ tech stack ]", learned:"[ one or two lines about it ]", stack:"[ stack ]", link:""},
+  {name:"[ project six ]",   meta:"[ year ] · [ tech stack ]", learned:"[ one or two lines about it ]", stack:"[ stack ]", link:""}
+];
+
+const HOBBIES = [
+  {id:"hike",    name:"hiking",           note:"weekend trails, always slower than planned. i stop for every flower."},
+  {id:"boulder", name:"bouldering",       note:"currently projecting v4. my fingers have opinions about this."},
+  {id:"photo",   name:"photography",      note:"mostly plants and my friends mid-sentence."},
+  {id:"bake",    name:"baking",           note:"cinnamon anything. i measure by feeling, which explains a lot."},
+  {id:"gym",     name:"gym",              note:"three times a week when i'm being good to myself."},
+  {id:"run",     name:"running",          note:"sometimes! short ones. i'm working on liking it."},
+  {id:"content", name:"content creating", note:"little edits of ordinary days."},
+  {id:"record",  name:"recording life",   note:"a photo and a line a day. this whole site is kind of that."}
+];
+
+const FAQS = [
+  {q:"did you build this yourself?", a:"yep! every window, sound and bloom. i'm a cs grad and this was my \"can i actually do it\" project :)"},
+  {q:"what's with all the orchids?", a:"they're my favourite flower, and this deep plum is my favourite colour — so the site ended up looking like my brain."},
+  {q:"can i use your photos?", a:"please ask me first! a message through the note window is perfect. i'll almost always say yes."},
+  {q:"are you looking for work?", a:"yes! email me and i'll send my cv right over."}
+];
+
+const LIFELOG = [
+  {date:"2026 · 08 · 24", caption:"first v4 send!! my fingers are gone but i'm so happy :0"},
+  {date:"2026 · 08 · 11", caption:"[ short caption — one or two lines ]"},
+  {date:"2026 · 07 · 29", caption:"[ short caption — one or two lines ]"}
+];
+
+/* how many photo slots the contact sheet shows */
+const GALLERY_COUNT = 8;
+
+const MOOD_NAMES = ["music: off", "music: pond", "music: rain", "music: sunroom"];
+
+const FACES = [
+  {id:"good", face:":D", name:"having a good one"},
+  {id:"ok",   face:":)", name:"pretty okay"},
+  {id:"low",  face:":(", name:"a bit sad"}
+];
+
+
+/* ============================================================
+   STATE — what the site remembers while you are on it
+   ============================================================ */
+const state = {
+  entered:false, theme:"day", lang:"en", sfx:true, mood:0,
+  open:[], pos:{}, blooms:[], watered:0, notes:0,
+  popup:null, hobby:null, faq:null, lightbox:null,
+  noteMsg:"", noteIg:"", noteSent:false, dayMood:null, pinnedProj:0
+};
+
+const app = document.getElementById("app");
+const isMobile = () => window.innerWidth < 768;
+const esc = (s) => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const t = (en, zh) => state.lang === "zh" ? zh : en;
+
+/* ---- saving to the visitor's own browser ---- */
+function save(){
+  try{
+    localStorage.setItem("belle.state", JSON.stringify({
+      theme:state.theme, lang:state.lang, sfx:state.sfx, watered:state.watered,
+      notes:state.notes, blooms:state.blooms, entered:state.entered, dayMood:state.dayMood
+    }));
+  }catch(e){}
+}
+function load(){
+  try{
+    const v = JSON.parse(localStorage.getItem("belle.state") || "null");
+    if(!v) return;
+    state.theme = v.theme === "night" ? "night" : "day";
+    state.lang = v.lang === "zh" ? "zh" : "en";
+    state.sfx = v.sfx !== false;
+    state.watered = v.watered || 0;
+    state.notes = v.notes || 0;
+    state.entered = !!v.entered;
+    state.blooms = (v.blooms || []).filter(id => SECTIONS.some(x => x.id === id));
+    state.dayMood = FACES.some(f => f.id === v.dayMood) ? v.dayMood : null;
+  }catch(e){}
+}
+
+/* ---- sound ---- */
+let audioCtx = null;
+function ac(){
+  if(!audioCtx){ try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ audioCtx = null; } }
+  if(audioCtx && audioCtx.state === "suspended") audioCtx.resume();
+  return audioCtx;
+}
+function blip(freq, dur, type, gain){
+  if(!state.sfx) return;
+  const c = ac(); if(!c) return;
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || "triangle"; o.frequency.value = freq;
+  g.gain.setValueAtTime(0, c.currentTime);
+  g.gain.linearRampToValueAtTime(gain || .07, c.currentTime + .012);
+  g.gain.exponentialRampToValueAtTime(.0001, c.currentTime + (dur || .16));
+  o.connect(g); g.connect(c.destination);
+  o.start(); o.stop(c.currentTime + (dur || .16) + .02);
+}
+const clickSound = () => blip(660, .13);
+const popSound = () => blip(1040, .07, "sine", .045);
+function chime(){ blip(784, .18); setTimeout(() => blip(1175, .22), 90); }
+
+/* background music — four little loops, cycled by the ▶ button */
+let moodTimer = null;
+function cycleMood(){
+  clickSound();
+  state.mood = (state.mood + 1) % 4;
+  if(moodTimer){ clearInterval(moodTimer); moodTimer = null; }
+  render();
+  if(state.mood === 0) return;
+  const scales = [[392,440,523,587],[349,415,466,523],[440,494,587,659]];
+  const notes = scales[state.mood - 1];
+  let i = 0;
+  const play = () => {
+    if(!state.sfx) return;
+    const c = ac(); if(!c) return;
+    const o = c.createOscillator(), g = c.createGain();
+    o.type = "sine"; o.frequency.value = notes[i++ % notes.length];
+    g.gain.setValueAtTime(0, c.currentTime);
+    g.gain.linearRampToValueAtTime(.03, c.currentTime + .3);
+    g.gain.exponentialRampToValueAtTime(.0001, c.currentTime + 2.4);
+    o.connect(g); g.connect(c.destination);
+    o.start(); o.stop(c.currentTime + 2.5);
+  };
+  play();
+  moodTimer = setInterval(play, 2000);
+}
+
+/* ---- pop-ups ---- */
+let popTimer = null;
+function showPopup(msg){
+  state.popup = msg || MSGS[Math.floor(Math.random() * MSGS.length)];
+  render();
+  if(popTimer) clearTimeout(popTimer);
+  popTimer = setTimeout(() => { state.popup = null; render(); }, POPUP_SECONDS * 1000);
+}
+
+/* ---- petal trail on the cursor ---- */
+let lastPetal = 0;
+function petal(e){
+  if(isMobile() || !state.entered) return;
+  const now = Date.now();
+  if(now - lastPetal < 90) return;
+  lastPetal = now;
+  const d = document.createElement("div");
+  const size = 5 + Math.random() * 5;
+  d.style.cssText = "position:fixed;left:" + (e.clientX - size/2) + "px;top:" + (e.clientY - size/2) +
+    "px;width:" + size + "px;height:" + size + "px;border-radius:60% 40% 60% 40%;background:var(--accent);opacity:.45;" +
+    "pointer-events:none;z-index:9999;--dx:" + ((Math.random()*24)-12) + "px;animation:petal .9s ease-out forwards";
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 950);
+}
+
+
+/* ============================================================
+   THE VIEW — html for each piece of the site
+   ============================================================ */
+const dots = (n) => '<span class="dots">' + '<span class="dot"></span>'.repeat(n) + '</span>';
+
+function landingView(){
+  return '' +
+  '<div class="landing">' +
+    '<div class="landing-ground"></div>' +
+    '<div class="landing-inner">' +
+      '<div class="mono" style="font-size:13px;letter-spacing:.24em;color:var(--accent)">BELLE 詩帷</div>' +
+      '<h1>psst — tap the seed</h1>' +
+      '<p>one click and the whole thing grows open. sound is on — turn it off any time :)</p>' +
+      '<button class="seed" data-act="enter">plant me</button>' +
+      '<div class="mono" style="font-size:12px;color:var(--soft);margin-top:26px">' + wateredLine() + '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+const wateredLine = () =>
+  (state.theme === "night" ? "sleeping · " : "") + "you watered me " + state.watered + "×";
+
+function titlebarView(){
+  return '' +
+  '<div class="titlebar">' +
+    '<span style="display:flex;align-items:center;gap:9px">' + dots(2) + 'belle@orchid ~ %</span>' +
+    '<span class="tb-btns">' +
+      '<button class="tb-btn" data-act="sfx">' + (state.sfx ? "sfx on" : "sfx off") + '</button>' +
+      '<button class="tb-btn" data-act="theme">' + (state.theme === "night" ? "☀ day" : "☾ night") + '</button>' +
+      '<button class="tb-btn" data-act="lang">' + (state.lang === "en" ? "en / 中" : "中 / en") + '</button>' +
+      '<button class="tb-btn" data-act="mood">' + MOOD_NAMES[state.mood] + '</button>' +
+    '</span>' +
+  '</div>';
+}
+
+function homeView(){
+  const bloomN = state.blooms.length;
+  const icons = SECTIONS.map(s =>
+    '<button class="icon-btn' + (state.blooms.indexOf(s.id) === -1 ? '' : ' bloomed') + '" data-act="open" data-id="' + s.id + '">' +
+      '<span class="tile">' + s.code + '</span>' +
+      '<span class="icon-label">' + esc(t(s.en, s.zh)) + '</span>' +
+    '</button>'
+  ).join("");
+
+  return '' +
+  '<div class="home-win">' +
+    '<div class="win-head">' + dots(2) + 'home</div>' +
+    '<div class="home-body">' +
+      '<h1>' + esc(t("hello! i'm belle 詩帷", "你好！我是 belle 詩帷")) + '</h1>' +
+      '<p class="sub">' + esc(t("cs grad · hikes, boulders, bakes, records life", "資工畢業 · 爬山、抱石、烘焙、記錄生活")) + '</p>' +
+      '<div class="bloom-line">' +
+        esc(t("[ open a window to make the orchid bloom · ", "[ 打開一個視窗，蘭花就開一朵 · ")) + bloomN + " / " + SECTIONS.length + " ]" +
+      '</div>' +
+      '<div class="icon-grid">' + icons + '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function popupView(){
+  if(!state.popup) return "";
+  return '' +
+  '<div class="popup">' +
+    '<div class="popup-text">' + esc(state.popup) + '</div>' +
+    '<div class="popup-track"><div class="popup-bar" style="animation:shrinkbar ' + (POPUP_SECONDS*1000) + 'ms linear forwards"></div></div>' +
+  '</div>';
+}
+
+function nightView(){
+  if(state.theme !== "night") return "";
+  const flies = [
+    {l:"12%", tp:"32%", s:7, fly:9,  glow:2.4, d:0},
+    {l:"34%", tp:"58%", s:6, fly:11, glow:2.4, d:1},
+    {l:"72%", tp:"44%", s:7, fly:13, glow:3.4, d:2},
+    {l:"58%", tp:"74%", s:5, fly:10, glow:2.8, d:3}
+  ].map(f =>
+    '<div class="firefly" style="left:' + f.l + ';top:' + f.tp + ';width:' + f.s + 'px;height:' + f.s + 'px;' +
+    'animation:fly ' + f.fly + 's infinite ' + f.d + 's, glow ' + f.glow + 's infinite ' + (f.d * .4) + 's"></div>'
+  ).join("");
+  return '<div class="night-layer"><div class="moon"></div>' + flies + '</div>';
+}
+
+const wavesView = () => '' +
+  '<div class="waves">' +
+    '<svg class="wave-1" viewBox="0 0 1440 120" preserveAspectRatio="none">' +
+      '<path d="M0,70 C120,40 240,100 360,70 C480,40 600,100 720,70 C840,40 960,100 1080,70 C1200,40 1320,100 1440,70 L1440,120 L0,120 Z" fill="var(--accent)" opacity=".10"></path>' +
+    '</svg>' +
+    '<svg class="wave-2" viewBox="0 0 1440 120" preserveAspectRatio="none">' +
+      '<path d="M0,80 C160,55 300,105 480,80 C640,58 780,104 960,80 C1120,58 1280,104 1440,80 L1440,120 L0,120 Z" fill="var(--accent)" opacity=".16"></path>' +
+    '</svg>' +
+  '</div>';
+
+/* ---- the windows ---- */
+function defaultPos(id){
+  const i = SECTIONS.findIndex(s => s.id === id);
+  return {x: 26 + i * 20, y: 22 + i * 16};
+}
+
+function winView(sec){
+  const i = state.open.indexOf(sec.id);
+  const p = state.pos[sec.id] || defaultPos(sec.id);
+  const style = "left:" + p.x + "px;top:" + p.y + "px;width:min(" + sec.w + "px,calc(100% - 40px));z-index:" + (20 + i);
+  return '' +
+  '<div class="win" id="win-' + sec.id + '" style="' + style + '">' +
+    '<div class="win-head grab" data-drag="' + sec.id + '">' +
+      '<span style="display:flex;align-items:center;gap:8px">' + dots(2) + esc(t(sec.en, sec.zh)) + '/</span>' +
+      '<button class="win-close" data-act="close" data-id="' + sec.id + '">✕</button>' +
+    '</div>' +
+    '<div class="win-body">' + BODIES[sec.id]() + '</div>' +
+  '</div>';
+}
+
+/* the detail panel under the project grid — follows whichever card you hover */
+function pinnedHTML(){
+  const pin = PROJECTS[state.pinnedProj];
+  if(!pin) return "";
+  return '' +
+    '<div style="margin-top:14px" class="field">' +
+      '<div class="label">' + esc(pin.name) + '</div>' +
+      '<div style="font:400 16px/1.5 \'Zen Maru Gothic\',sans-serif;color:var(--ink);margin-top:4px">' + esc(pin.detail || pin.learned) + '</div>' +
+      '<div class="note" style="margin-top:6px">' + esc(pin.stack) + '</div>' +
+      (pin.link ? '<a href="' + pin.link + '" target="_blank" rel="noreferrer" style="display:inline-block;font:500 13px \'Space Mono\',monospace;margin-top:6px">open the live site →</a>' : '') +
+    '</div>';
+}
+
+const BODIES = {
+  about: () => '' +
+    '<div class="row">' +
+      '<div style="flex:none;width:140px">' +
+        '<div class="ph avatar">your photo</div>' +
+        '<div class="mono" style="font-size:12px;color:var(--soft);text-align:center;margin-top:8px">belle 詩帷</div>' +
+      '</div>' +
+      '<div class="about-text">' +
+        '<h2>hello! i hope you are having so much fun exploring this webpage :0</h2>' +
+        '<p class="lead" style="margin:0 0 18px">i have so many big ideas i wanna achieve! thank you for being part of my journey, you are so awesome!</p>' +
+        '<div class="stack">' +
+          '<div class="field"><div class="label">EDUCATION</div><div class="field-val">[ your degree ] · [ university ] · [ year ]</div></div>' +
+          '<div class="field"><div class="label">OTHER INTERESTS</div><div class="field-val">hiking · photography · bouldering · baking · gym · sometimes running · content creating</div></div>' +
+          '<div class="field"><div class="label">LANGUAGES</div><div class="field-val">english — fluent · mandarin — fluent · japanese — learning</div></div>' +
+        '</div>' +
+      '</div>' +
+    '</div>',
+
+  projects: () => {
+    const cards = PROJECTS.map((p, i) =>
+      '<div class="proj-card' + (p.link ? ' linked' : '') + '" data-act="proj" data-i="' + i + '">' +
+        '<div class="proj-face">' +
+          (p.thumb
+            ? '<div class="thumb real" style="background-image:url(' + p.thumb + ')"></div>'
+            : '<div class="ph thumb">project thumb</div>') +
+          '<div class="proj-name">' + esc(p.name) + '</div>' +
+        '</div>' +
+        '<div class="proj-back">' +
+          '<div class="proj-title">' + esc(p.name) + '</div>' +
+          '<div class="proj-meta">' + esc(p.meta) + '</div>' +
+          '<div class="proj-desc">' + esc(p.learned) + '</div>' +
+          '<div class="proj-cta">' + (p.link ? "click to open the site →" : "link coming soon") + '</div>' +
+        '</div>' +
+      '</div>'
+    ).join("");
+
+    return '' +
+      '<p class="lead" style="margin:0 0 6px">hover a card to read it — there\'s a little pop each time :)</p>' +
+      '<div class="label" style="margin-bottom:12px">PERSONAL AND UNIVERSITY GROUP PROJECTS</div>' +
+      '<div class="proj-grid">' + cards + '</div>' +
+      '<div id="proj-pinned">' + pinnedHTML() + '</div>' +
+      '<p class="lead" style="font-size:15px;margin-top:14px">github links drop in once you add them to the PROJECTS list.</p>';
+  },
+
+  gallery: () => {
+    if(state.lightbox !== null){
+      return '' +
+        '<div class="ph lightbox-img">photo ' + (state.lightbox + 1) + ' — full size</div>' +
+        '<div class="lightbox-bar">' +
+          '<div class="lead" style="font-size:16px">[ caption for this one ]</div>' +
+          '<button class="btn-quiet" data-act="lightbox-close">back to the sheet</button>' +
+        '</div>';
+    }
+    let frames = "";
+    for(let i = 0; i < GALLERY_COUNT; i++){
+      frames += '<button class="ph frame-btn" data-act="lightbox" data-i="' + i + '">photo ' + (i+1) + '</button>';
+    }
+    return '' +
+      '<div class="label" style="margin-bottom:10px">CONTACT SHEET · CLICK A FRAME</div>' +
+      '<div class="sheet">' + frames + '</div>' +
+      '<p class="lead" style="font-size:16px;margin-top:10px">hikes, climbs and things i baked. drop your real photos in and the captions come with them.</p>';
+  },
+
+  hobbies: () => {
+    const cards = HOBBIES.map(h =>
+      '<button class="hobby-card' + (state.hobby === h.id ? ' on' : '') + '" data-act="hobby" data-id="' + h.id + '">' +
+        '<span class="hobby-icon">icon</span>' +
+        '<span class="hobby-name">' + esc(h.name) + '</span>' +
+      '</button>'
+    ).join("");
+    const cur = HOBBIES.find(h => h.id === state.hobby);
+    const detail = !cur ? "" :
+      '<div class="field" style="margin-top:14px">' +
+        '<div class="label">' + esc(cur.name.toUpperCase()) + '</div>' +
+        '<div style="font:400 17px/1.55 \'Zen Maru Gothic\',sans-serif;color:var(--ink);margin-top:4px">' + esc(cur.note) + '</div>' +
+      '</div>';
+    return '' +
+      '<p class="lead" style="margin:0 0 12px">click one and it opens up</p>' +
+      '<div class="hobby-grid">' + cards + '</div>' + detail;
+  },
+
+  lifelog: () => '<div class="log">' + LIFELOG.map(e =>
+      '<div class="log-entry">' +
+        '<div class="ph log-photo">photo</div>' +
+        '<div class="log-text">' +
+          '<div class="log-date">' + esc(e.date) + '</div>' +
+          '<div class="log-caption">' + esc(e.caption) + '</div>' +
+        '</div>' +
+      '</div>'
+    ).join("") + '</div>',
+
+  faq: () => '<div class="faq-list">' + FAQS.map((f, i) =>
+      '<div class="faq-item' + (state.faq === i ? ' on' : '') + '">' +
+        '<button class="faq-q" data-act="faq" data-i="' + i + '">' +
+          '<span>' + esc(f.q) + '</span><span class="chev">▾</span>' +
+        '</button>' +
+        (state.faq === i ? '<div class="faq-a">' + esc(f.a) + '</div>' : '') +
+      '</div>'
+    ).join("") + '</div>',
+
+  note: () => {
+    const total = Math.min(state.notes, 14);
+    let blooms = "";
+    for(let i = 0; i < total; i++){
+      const ang = (i / 14) * Math.PI * 2;
+      blooms += '<span class="bloom" style="left:' + (50 + Math.cos(ang)*30) + '%;top:' + (46 + Math.sin(ang)*32) +
+        '%;animation:bloomin .5s ease-out ' + (i * .12) + 's both"></span>';
+    }
+    const plant = '' +
+      '<div class="plant-col">' +
+        '<div class="plant">' +
+          '<div class="stem"></div>' + blooms +
+          (total === 0 ? '<div class="plant-empty">no blooms yet</div>' : '') +
+        '</div>' +
+        '<div class="bloom-count">' + state.notes + ' NOTES BLOOMED</div>' +
+      '</div>';
+
+    const form = state.noteSent
+      ? '<div class="note-col">' +
+          '<h2 style="font-size:clamp(1.4rem,2.4vw,1.9rem)">planted! thank you :0</h2>' +
+          '<p class="lead" style="margin:0 0 14px">your note is a bloom on my orchid now. only i can read the words — everyone else just sees it flower.</p>' +
+          '<button class="btn" data-act="note-reset">leave another one</button>' +
+        '</div>'
+      : '<div class="note-col">' +
+          '<h2>hi, thanks for taking your time to visit my website and getting to know more about me! is there anything you would love to tell me? i would love to know you as a person!</h2>' +
+          '<textarea class="ta" id="note-msg" placeholder="your message…">' + esc(state.noteMsg) + '</textarea>' +
+          '<div class="note-row">' +
+            '<input class="in" id="note-ig" placeholder="@instagram (optional)" value="' + esc(state.noteIg) + '">' +
+            '<button class="btn" data-act="note-send">plant it →</button>' +
+          '</div>' +
+          '<p class="note" style="margin-top:12px">only belle reads the words — visitors just see the blooms. hook this up to a form service and the notes land in your inbox.</p>' +
+        '</div>';
+
+    return '<div class="row" style="gap:20px">' + plant + form + '</div>';
+  },
+
+  contact: () => '' +
+    '<div class="centered">' +
+      '<h2>yayy mail! :0</h2>' +
+      '<p class="lead" style="margin:0 0 18px">the best way to reach me is email — i reply to everything, eventually heheh</p>' +
+      '<a class="btn mail-btn" href="mailto:' + EMAIL + '?subject=hi%20belle!&body=hi%20belle!%20i%20found%20you%20through%20your%20website%20—%20">' + EMAIL + '</a>' +
+      '<div class="note" style="margin-top:10px">opens your mail app with the subject already filled in</div>' +
+      '<div class="socials">' +
+        '<a href="' + LINKS.instagram + '" target="_blank" rel="noreferrer">instagram</a>' +
+        '<a href="' + LINKS.github + '" target="_blank" rel="noreferrer">github</a>' +
+        '<a href="' + LINKS.linkedin + '" target="_blank" rel="noreferrer">linkedin</a>' +
+      '</div>' +
+      '<p class="note" style="margin-top:16px">every link opens in a new tab!</p>' +
+    '</div>',
+
+  cv: () => '' +
+    '<div class="centered">' +
+      '<div class="label">CV</div>' +
+      '<h2 style="font-size:clamp(1.4rem,2.6vw,1.9rem);margin:6px 0 10px">email me for my cv, i don\'t bite heheh</h2>' +
+      '<p class="lead" style="margin:0 0 18px">tell me a little about the role and i\'ll send it right over, same day if i\'m awake.</p>' +
+      '<a class="btn mail-btn" style="font-size:18px" href="mailto:' + EMAIL + '?subject=cv%20please!&body=hi%20belle!%20could%20you%20send%20me%20your%20cv%3F%20the%20role%20is%20">request my cv →</a>' +
+    '</div>'
+};
+
+function bottombarView(){
+  const bloomN = state.blooms.length;
+  const face = state.theme === "night" ? "zzz" : (bloomN >= SECTIONS.length ? "^^" : "orc");
+  const faces = FACES.map(f =>
+    '<button class="mood-btn' + (state.dayMood === f.id ? ' on' : '') + '" data-act="day" data-id="' + f.id + '" title="' + f.name + '">' + f.face + '</button>'
+  ).join("");
+  return '' +
+  '<div class="bottombar">' +
+    '<button class="orchid-btn" data-act="water">' +
+      '<span class="orchid">' + face + '</span>' +
+      '<span class="orchid-line">' + wateredLine() + '</span>' +
+    '</button>' +
+    '<div class="mood">' +
+      '<span class="orchid-line">' + esc(t("how is your day?", "你今天好嗎？")) + '</span>' +
+      '<div class="mood-faces">' + faces + '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function render(){
+  document.documentElement.dataset.theme = state.theme;
+  if(!state.entered){ app.innerHTML = landingView(); return; }
+  app.innerHTML = '' +
+  '<div class="frame-wrap">' +
+    '<div class="frame">' +
+      titlebarView() +
+      '<div class="desk">' +
+        wavesView() + nightView() + homeView() + popupView() +
+        state.open.map(id => winView(SECTIONS.find(s => s.id === id))).join("") +
+      '</div>' +
+      bottombarView() +
+    '</div>' +
+  '</div>';
+}
+
+
+/* ============================================================
+   ACTIONS — what each click does
+   ============================================================ */
+const actions = {
+  enter(){
+    chime();
+    state.entered = true;
+    state.watered++;
+    save();
+    showPopup();
+  },
+  open(el){
+    const id = el.dataset.id;
+    clickSound();
+    state.open = state.open.filter(x => x !== id).concat([id]);
+    if(state.blooms.indexOf(id) === -1) state.blooms.push(id);
+    save(); render();
+  },
+  close(el){
+    blip(440, .12);
+    state.open = state.open.filter(x => x !== el.dataset.id);
+    render();
+  },
+  sfx(){
+    state.sfx = !state.sfx;
+    save(); render();
+    if(state.sfx) popSound();
+  },
+  theme(){ clickSound(); state.theme = state.theme === "day" ? "night" : "day"; save(); render(); },
+  lang(){ clickSound(); state.lang = state.lang === "en" ? "zh" : "en"; save(); render(); },
+  mood(){ cycleMood(); },
+  water(){ popSound(); state.watered++; save(); render(); },
+  proj(el){
+    const i = +el.dataset.i;
+    pinProject(i);
+    const p = PROJECTS[i];
+    if(!p.link) return;
+    clickSound();
+    window.open(p.link, "_blank", "noopener");
+  },
+  hobby(el){
+    clickSound();
+    state.hobby = state.hobby === el.dataset.id ? null : el.dataset.id;
+    render();
+  },
+  faq(el){
+    clickSound();
+    const i = +el.dataset.i;
+    state.faq = state.faq === i ? null : i;
+    render();
+  },
+  lightbox(el){ popSound(); state.lightbox = +el.dataset.i; render(); },
+  "lightbox-close"(){ clickSound(); state.lightbox = null; render(); },
+  "note-send"(){
+    const ta = document.getElementById("note-msg");
+    if(!ta || !ta.value.trim()) return;
+    /* Right now the note only blooms in the visitor's own browser.
+       To actually receive it, sign up for a free form service
+       (Formspree, Netlify Forms, Google Forms) and post the values here. */
+    chime();
+    state.notes++;
+    state.noteSent = true;
+    state.noteMsg = "";
+    state.noteIg = "";
+    save(); render();
+  },
+  "note-reset"(){ clickSound(); state.noteSent = false; render(); },
+  day(el){
+    popSound();
+    const id = el.dataset.id;
+    const same = state.dayMood === id;
+    state.dayMood = same ? null : id;
+    save();
+    if(same){ state.popup = null; render(); }
+    else showPopup(id === "good" ? "yayy! i'm so glad :0" : id === "ok" ? "okay is good too :)" : "pat pat you got this ;>");
+  }
+};
+
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-act]");
+  if(!el) return;
+  const fn = actions[el.dataset.act];
+  if(fn) fn(el);
+});
+
+/* keep what a visitor typed if the window re-renders */
+document.addEventListener("input", (e) => {
+  if(e.target.id === "note-msg") state.noteMsg = e.target.value;
+  if(e.target.id === "note-ig") state.noteIg = e.target.value;
+});
+
+/* swap the detail panel without redrawing the whole window, so the
+   card you are hovering does not flicker */
+function pinProject(i){
+  if(state.pinnedProj === i) return;
+  state.pinnedProj = i;
+  const slot = document.getElementById("proj-pinned");
+  if(slot) slot.innerHTML = pinnedHTML();
+}
+
+/* pop sound when hovering the things that should feel clicky */
+document.addEventListener("mouseover", (e) => {
+  const card = e.target.closest(".proj-card");
+  if(card) pinProject(+card.dataset.i);
+  if(e.target.closest(".icon-btn, .proj-card, .frame-btn")) popSound();
+});
+
+/* ---- dragging the windows ---- */
+let drag = null;
+document.addEventListener("mousedown", (e) => {
+  const head = e.target.closest("[data-drag]");
+  if(!head || isMobile() || e.target.closest(".win-close")) return;
+  const id = head.dataset.drag;
+  const p = state.pos[id] || defaultPos(id);
+  drag = {id, sx:e.clientX, sy:e.clientY, ox:p.x, oy:p.y, el:document.getElementById("win-" + id)};
+  e.preventDefault();
+});
+document.addEventListener("mousemove", (e) => {
+  if(drag){
+    const x = drag.ox + e.clientX - drag.sx;
+    const y = drag.oy + e.clientY - drag.sy;
+    state.pos[drag.id] = {x, y};
+    if(drag.el){ drag.el.style.left = x + "px"; drag.el.style.top = y + "px"; }
+  }
+  petal(e);
+});
+document.addEventListener("mouseup", () => { drag = null; });
+
+let lastMobile = isMobile();
+window.addEventListener("resize", () => {
+  if(isMobile() !== lastMobile){ lastMobile = isMobile(); render(); }
+});
+
+load();
+render();
+</script>
+</body>
+</html>
